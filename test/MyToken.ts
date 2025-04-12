@@ -5,10 +5,8 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 
 // 모카프레임워크를 사용하여 테스트를 진행
 describe("mytoken deploy", () => {
-    let myTokenContract:MyToken; // type을 모른다는 에러를 내지만, 이는 typescript라 그럼 시행은 문제 없음
-    // 거슬리니 타입을 :MyToken이런식으로 명시 
-    // before는 이 테스트케이스를 시행하기전 한번 시행하라는 의미
-    let signers: HardhatEthersSigner[]; // signer의 타입을 명시
+    let myTokenContract:MyToken;
+    let signers: HardhatEthersSigner[]; 
     before("should deploy", async () => {
          myTokenContract = await hre.ethers.deployContract("MyToken",["MyToken", "MT", 18,]);
          // 이를 통해 myTokenContract를 생성함
@@ -33,6 +31,19 @@ describe("mytoken deploy", () => {
     });
     it("should retrun 1MT balance for signer 0", async () => {
         expect(await myTokenContract.balanceOf(signers[0].address)).equal(1n*10n**18n);
+    });
+    it("should return 0.5MT", async () => {
+        const signer1 = signers[1];
+        await myTokenContract.transfer(signer1.address, hre.ethers.parseUnits("0.5", 18));
+        expect(await myTokenContract.balanceOf(signer1.address)).equal(hre.ethers.parseUnits("0.5", 18));
+        console.log("signer1 balance: ", await myTokenContract.balanceOf(signer1.address));
+    });
+
+    it("should ", async () => {
+        const signer1 = signers[1];
+        await myTokenContract.transfer(signer1.address, hre.ethers.parseUnits("1.5", 18));
+        //expect(await myTokenContract.balanceOf(signer1.address)).equal(hre.ethers.parseUnits("0.5", 18));
+        //console.log("signer1 balance: ", await myTokenContract.balanceOf(signer1.address));
     });
 });
 //npx hardhat test

@@ -25,6 +25,12 @@ contract MyToken {
         balanceOf[owner] += amount; // owner의 잔고에 amount를 더해준다.
     }
 
+    function transfer(address to, uint256 amount) external {
+        require(balanceOf[msg.sender] >= amount, "insufficient balance"); // 송신자의 잔고가 amount보다 적으면 에러 발생
+        balanceOf[msg.sender] -= amount; // 송신자로부터 amount를 차감한다.
+        balanceOf[to] += amount; // 수신자에게 amount를 더해준다.
+    }
+
 //external: 외부에서만 호출 가능
 //public: 외부와 내부에서 모두 호출 가능
 //view: 상태변수를 읽기만 하고 수정하지 않겠다는 키워드
