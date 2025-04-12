@@ -15,6 +15,14 @@ contract MyToken {
        name = _name;
        symbol = _symbol;
        decimals = _decimals; 
+       _mint(1*10**uint256(decimals), msg.sender); // 컨트랙트 배포자에게 발행량을 부여한다.
+    // 1 ether = 10^18 wei
+    // 즉 컨트랙트를 배포하는 사람에게 1MT 만큼 발행량을 부여한다.  
+    }
+
+    function _mint(uint256 amount, address owner) internal {
+        totalSupply += amount; 
+        balanceOf[owner] += amount; // owner의 잔고에 amount를 더해준다.
     }
 
 //external: 외부에서만 호출 가능

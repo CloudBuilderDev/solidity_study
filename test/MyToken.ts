@@ -29,10 +29,10 @@ describe("mytoken deploy", () => {
     });
 
     it("should return 0 totalSupply", async () => {
-        expect(await myTokenContract.totalSupply()).equal(0);
+        expect(await myTokenContract.totalSupply()).equal(1n*10n**18n);
     });
-    it("should retrun 0 balane for signer 0", async () => {
-        expect(await myTokenContract.balanceOf(signers[0].address)).equal(0);
+    it("should retrun 1MT balance for signer 0", async () => {
+        expect(await myTokenContract.balanceOf(signers[0].address)).equal(1n*10n**18n);
     });
 });
 //npx hardhat test
