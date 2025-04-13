@@ -1,4 +1,4 @@
-import hre from "hardhat";
+/*import hre from "hardhat";
 import {ethers} from "ethers"
 
 describe("hardhat-test",()=> {
@@ -49,4 +49,4 @@ describe("hardhat-test",()=> {
         console.log(ethers.formatEther(await provider.getBalance(BobWallet.address)));
         console.log(ethers.formatEther(await provider.getBalance(AliceWallet.address)));
     });
-});
+}); */

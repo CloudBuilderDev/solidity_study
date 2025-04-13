@@ -2,6 +2,8 @@
 pragma solidity ^0.8.28;
 
 contract MyToken {
+    event Transfer(address indexed from, address indexed to, uint256 value);
+    event Approval(address indexed spender, uint256 amount);
     string public name;
     string public symbol;
     uint8 public decimals; // 1wei --> 1*10^-18 즉 지원하는 소수점 범위 
@@ -10,6 +12,8 @@ contract MyToken {
     mapping(address => uint256) public balanceOf; // 어떤 주소의 잔고(key => value)
     // 모든 address타입의 길이는 20byte로 고정되어 있다.
     // 위 mapping으로 balanceOf를 어떤 배열로 만들 수 있다.
+
+    mapping (address => mapping(address => uint256)) allowance;
 
     constructor(string memory _name, string memory _symbol, uint8 _decimals, uint256 _amount) {
        name = _name;
@@ -23,12 +27,29 @@ contract MyToken {
     function _mint(uint256 amount, address owner) internal {
         totalSupply += amount; 
         balanceOf[owner] += amount; // owner의 잔고에 amount를 더해준다.
+        emit Transfer(address(0), owner, amount); 
     }
 
     function transfer(address to, uint256 amount) external {
         require(balanceOf[msg.sender] >= amount, "insufficient balance"); // 송신자의 잔고가 amount보다 적으면 에러 발생
         balanceOf[msg.sender] -= amount; // 송신자로부터 amount를 차감한다.
         balanceOf[to] += amount; // 수신자에게 amount를 더해준다.
+
+        emit Transfer(msg.sender, to, amount);
+    }
+
+    function approve(address spender, uint256 amount) external {
+        allowance[msg.sender][spender] = amount; // 송신자가 spender에게 amount만큼의 토큰을 쓸 수 있도록 허가한다.
+        emit Approval(spender, amount); // spender에게 허가했다는 이벤트를 발생시킨다.
+    }
+    function transferFrom(address from, address to, uint256 amount) external {
+        address spender = msg.sender; // 송신자 즉, 토큰을 가진 사람이 아니라 owner에게 전송을 허락받은 사람이다
+        require(allowance[from][spender] >= amount, "insufficient allowance"); // 송신자가 spender에게 허락한 양이 amount보다 적으면 에러 발생
+        allowance[from][spender] -= amount; // sepnder가 송신을 허락받은 양 만큼 차감한다.  
+        balanceOf[from] -= amount; // 송신자에게서 amount를 차감한다.
+        balanceOf[to] += amount; // 수신자에게 amount를 더해준다.
+
+        emit Transfer(from, to, amount);
     }
 
 //external: 외부에서만 호출 가능
