@@ -98,5 +98,53 @@ describe("MyToken", () => {
       ).to.be.revertedWith("insufficient balance");
     });
   });
+
+  describe("Transfer From", () => {
+    it("should emit Approval event", async () => {
+      const signer1 = signers[1];
+      await expect(
+        myTokenContract.approve(
+          signer1.address,
+          hre.ethers.parseUnits("10", decimals)
+        )
+      )
+        .to.emit(myTokenContract, "Approval")
+        .withArgs(signer1.address, hre.ethers.parseUnits("10", decimals));
+    });
+    it("should be reverted with insufficient allowance error", async () => {
+      const signer0 = signers[0];
+      const signer1 = signers[1];
+      await expect(
+        myTokenContract
+          .connect(signer1)
+          .transferFrom(
+            signer0.address,
+            signer1.address,
+            hre.ethers.parseUnits("10", decimals)
+          )
+      ).to.be.revertedWith("insufficient allowance");
+    });
+    it("check transferFrom fucntion ", async () => {
+      const signer0 = signers[0];
+      const signer1 = signers[1];
+      await myTokenContract.approve(
+        signer1.address,
+        hre.ethers.parseUnits("100", decimals)
+      ); // signer1에게 singer0의 100MT 이동권을 승인
+      await myTokenContract
+        .connect(signer1)
+        .transferFrom(
+          signer0.address,
+          signer1.address,
+          hre.ethers.parseUnits("10", decimals)
+        ); // singer1로 연결하고, signer1의 transferFrom을 호출하여 signer0의 10MT를 signer1에게 전송
+      expect(await myTokenContract.balanceOf(signer1.address)).to.equal(
+        hre.ethers.parseUnits("10", decimals)
+      ); // signer1의 잔고가 10MT인지 확인
+      expect(await myTokenContract.balanceOf(signer0.address)).to.equal(
+        hre.ethers.parseUnits("90", decimals)
+      ); // signer0의 잔고가 90MT인지 확인
+    });
+  });
 });
 //npx hardhat test
