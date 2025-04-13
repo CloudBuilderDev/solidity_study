@@ -11,11 +11,11 @@ contract MyToken {
     // 모든 address타입의 길이는 20byte로 고정되어 있다.
     // 위 mapping으로 balanceOf를 어떤 배열로 만들 수 있다.
 
-    constructor(string memory _name, string memory _symbol, uint8 _decimals) {
+    constructor(string memory _name, string memory _symbol, uint8 _decimals, uint256 _amount) {
        name = _name;
        symbol = _symbol;
        decimals = _decimals; 
-       _mint(1*10**uint256(decimals), msg.sender); // 컨트랙트 배포자에게 발행량을 부여한다.
+       _mint(_amount*10**uint256(decimals), msg.sender); // 컨트랙트 배포자에게 발행량을 부여한다.
     // 1 ether = 10^18 wei
     // 즉 컨트랙트를 배포하는 사람에게 1MT 만큼 발행량을 부여한다.  
     }
