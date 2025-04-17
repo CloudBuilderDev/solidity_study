@@ -19,11 +19,11 @@ contract TinyBank {
     event Staked(address, uint256);
 
     IMyToken public stakingToken; // 예금/출금을 위한 토큰의 주소를 저장
-    mapping(address => uint256) staked;
-    uint256 totalStaked;
+    mapping(address => uint256) public staked;
+    uint256 public totalStaked;
 
     constructor(IMyToken _stakingToken) {
-        stakingToken = _stakingToken;
+        stakingToken = IMyToken(_stakingToken);
     }
 
     function stake(uint256 _amount) external {
