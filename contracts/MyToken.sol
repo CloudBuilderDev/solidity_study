@@ -29,6 +29,10 @@ contract MyToken {
         balanceOf[owner] += amount; // owner의 잔고에 amount를 더해준다.
         emit Transfer(address(0), owner, amount); 
     }
+    
+    function mint (uint256 amount, address owner) external{
+        _mint(amount, owner);
+    }
 
     function transfer(address to, uint256 amount) external {
         require(balanceOf[msg.sender] >= amount, "insufficient balance"); // 송신자의 잔고가 amount보다 적으면 에러 발생

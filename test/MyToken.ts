@@ -3,9 +3,8 @@ import { expect } from "chai";
 import { MyToken } from "../typechain-types";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import MyToken from "../ignition/modules/MyToken";
+import { DECIMALS, MINTING_AMOUNT } from "./constant";
 
-const DECIMALS = 18n;
-const MINTING_AMOUNT = 100n;
 const totalSupply = MINTING_AMOUNT * 10n ** DECIMALS;
 
 // 모카프레임워크를 사용하여 테스트를 진행

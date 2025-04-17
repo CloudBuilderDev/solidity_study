@@ -28,24 +28,36 @@ describe("TinyBank", () => {
       const signer0 = signers[0];
       expect(await tinyBankContract.staked(signer0.address)).equal(0);
     });
-
-    describe("Staking", async () => {
-      it("should return staked amount", async () => {
-        const signer0 = signers[0];
-        const stakingAmount = hre.ethers.parseUnits("50", DECIMALS);
-        await myTokenContract.approve(
-          await tinyBankContract.getAddress(),
-          stakingAmount
-        );
-        await tinyBankContract.stake(stakingAmount);
-        expect(await tinyBankContract.staked(signer0.address)).equal(
-          stakingAmount
-        );
-        expect(await myTokenContract.balanceOf(tinyBankContract)).equal(
-          await tinyBankContract.totalStaked()
-        );
-        expect(await tinyBankContract.totalStaked()).equal(stakingAmount);
-      });
+  });
+  describe("Staking", async () => {
+    it("should return staked amount", async () => {
+      const signer0 = signers[0];
+      const stakingAmount = hre.ethers.parseUnits("50", DECIMALS);
+      await myTokenContract.approve(
+        await tinyBankContract.getAddress(),
+        stakingAmount
+      );
+      await tinyBankContract.stake(stakingAmount);
+      expect(await tinyBankContract.staked(signer0.address)).equal(
+        stakingAmount
+      );
+      expect(await myTokenContract.balanceOf(tinyBankContract)).equal(
+        await tinyBankContract.totalStaked()
+      );
+      expect(await tinyBankContract.totalStaked()).equal(stakingAmount);
+    });
+  });
+  describe("Withdraw", () => {
+    it("should return 0 staked after withdrawing total token", async () => {
+      const signer0 = signers[0];
+      const stakingAmount = hre.ethers.parseUnits("50", DECIMALS);
+      await myTokenContract.approve(
+        await tinyBankContract.getAddress(),
+        stakingAmount
+      );
+      await tinyBankContract.stake(stakingAmount);
+      await tinyBankContract.withdraw(stakingAmount);
+      expect(await tinyBankContract.staked(signer0.address)).equal(0);
     });
   });
 });
