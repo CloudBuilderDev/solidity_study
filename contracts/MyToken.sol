@@ -13,7 +13,7 @@ contract MyToken {
     // 모든 address타입의 길이는 20byte로 고정되어 있다.
     // 위 mapping으로 balanceOf를 어떤 배열로 만들 수 있다.
 
-    mapping (address => mapping(address => uint256)) allowance;
+    mapping (address => mapping(address => uint256)) public allowance;
 
     constructor(string memory _name, string memory _symbol, uint8 _decimals, uint256 _amount) {
        name = _name;
