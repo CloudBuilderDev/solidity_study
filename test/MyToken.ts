@@ -4,9 +4,9 @@ import { MyToken } from "../typechain-types";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import MyToken from "../ignition/modules/MyToken";
 
-const decimals = 18n;
-const mintingAmount = 100n;
-const totalSupply = mintingAmount * 10n ** decimals;
+const DECIMALS = 18n;
+const MINTING_AMOUNT = 100n;
+const totalSupply = MINTING_AMOUNT * 10n ** DECIMALS;
 
 // 모카프레임워크를 사용하여 테스트를 진행
 describe("MyToken", () => {
@@ -16,8 +16,8 @@ describe("MyToken", () => {
     myTokenContract = await hre.ethers.deployContract("MyToken", [
       "MyToken",
       "MT",
-      decimals,
-      mintingAmount,
+      DECIMALS,
+      MINTING_AMOUNT,
     ]);
     // 이를 통해 myTokenContract를 생성함
     // myTokenContract는 ethers.Contract의 인스턴스이다.
@@ -34,7 +34,7 @@ describe("MyToken", () => {
     });
 
     it("should retun decimals", async () => {
-      expect(await myTokenContract.decimals()).to.equal(decimals);
+      expect(await myTokenContract.decimals()).to.equal(DECIMALS);
     });
 
     it("should return 100 totalSupply", async () => {
@@ -66,17 +66,17 @@ describe("MyToken", () => {
         // await을 expect앞에 감싸줘야 의도한대로 작동한다.
         myTokenContract.transfer(
           signer1.address,
-          hre.ethers.parseUnits("0.5", decimals)
+          hre.ethers.parseUnits("0.5", DECIMALS)
         )
       )
         .to.emit(myTokenContract, "Transfer")
         .withArgs(
           signer0.address,
           signer1.address,
-          hre.ethers.parseUnits("0.5", decimals)
+          hre.ethers.parseUnits("0.5", DECIMALS)
         );
       expect(await myTokenContract.balanceOf(signer1.address)).equal(
-        hre.ethers.parseUnits("0.5", decimals)
+        hre.ethers.parseUnits("0.5", DECIMALS)
       );
 
       //const filter = myTokenContract.filters.Transfer(signer0.address); // 이 문장에서 에러가 발생한다. indexer가 없기 때문이다. 이를 .sol파일에서 이벤트 정의에서 추가해준다.
@@ -93,7 +93,7 @@ describe("MyToken", () => {
       await expect(
         myTokenContract.transfer(
           signer1.address,
-          hre.ethers.parseUnits((mintingAmount + 1n).toString(), decimals)
+          hre.ethers.parseUnits((MINTING_AMOUNT + 1n).toString(), DECIMALS)
         )
       ).to.be.revertedWith("insufficient balance");
     });
@@ -105,11 +105,11 @@ describe("MyToken", () => {
       await expect(
         myTokenContract.approve(
           signer1.address,
-          hre.ethers.parseUnits("10", decimals)
+          hre.ethers.parseUnits("10", DECIMALS)
         )
       )
         .to.emit(myTokenContract, "Approval")
-        .withArgs(signer1.address, hre.ethers.parseUnits("10", decimals));
+        .withArgs(signer1.address, hre.ethers.parseUnits("10", DECIMALS));
     });
     it("should be reverted with insufficient allowance error", async () => {
       const signer0 = signers[0];
@@ -120,7 +120,7 @@ describe("MyToken", () => {
           .transferFrom(
             signer0.address,
             signer1.address,
-            hre.ethers.parseUnits("10", decimals)
+            hre.ethers.parseUnits("10", DECIMALS)
           )
       ).to.be.revertedWith("insufficient allowance");
     });
@@ -129,20 +129,20 @@ describe("MyToken", () => {
       const signer1 = signers[1];
       await myTokenContract.approve(
         signer1.address,
-        hre.ethers.parseUnits("100", decimals)
+        hre.ethers.parseUnits("100", DECIMALS)
       ); // signer1에게 singer0의 100MT 이동권을 승인
       await myTokenContract
         .connect(signer1)
         .transferFrom(
           signer0.address,
           signer1.address,
-          hre.ethers.parseUnits("10", decimals)
+          hre.ethers.parseUnits("10", DECIMALS)
         ); // singer1로 연결하고, signer1의 transferFrom을 호출하여 signer0의 10MT를 signer1에게 전송
       expect(await myTokenContract.balanceOf(signer1.address)).to.equal(
-        hre.ethers.parseUnits("10", decimals)
+        hre.ethers.parseUnits("10", DECIMALS)
       ); // signer1의 잔고가 10MT인지 확인
       expect(await myTokenContract.balanceOf(signer0.address)).to.equal(
-        hre.ethers.parseUnits("90", decimals)
+        hre.ethers.parseUnits("90", DECIMALS)
       ); // signer0의 잔고가 90MT인지 확인
     });
   });
