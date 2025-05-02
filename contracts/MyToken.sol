@@ -1,15 +1,13 @@
 // SPDX-License-Identifier: MIT 
 pragma solidity ^0.8.28;
+import "./ManagedAccess.sol"; // ManagedAccess.sol을 import한다.
 
-contract MyToken {
+contract MyToken is ManagedAccess { // ManagedAccess를 상속받는다.
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Approval(address indexed spender, uint256 amount);
     string public name;
     string public symbol;
     uint8 public decimals; // 1wei --> 1*10^-18 즉 지원하는 소수점 범위 
-    address public owner; // 컨트랙트 배포자
-    address public manager; // TinyBank의 매니저
-
     uint256 public totalSupply; // 발행량
     mapping(address => uint256) public balanceOf; // 어떤 주소의 잔고(key => value)
     // 모든 address타입의 길이는 20byte로 고정되어 있다.
@@ -17,24 +15,17 @@ contract MyToken {
 
     mapping (address => mapping(address => uint256)) public allowance;
 
-    constructor(string memory _name, string memory _symbol, uint8 _decimals, uint256 _amount) {
+    constructor(string memory _name, string memory _symbol, uint8 _decimals, uint256 _amount) ManagedAccess(msg.sender, msg.sender) {
        name = _name;
        symbol = _symbol;
        decimals = _decimals; 
        _mint(_amount*10**uint256(decimals), msg.sender); // 컨트랙트 배포자에게 발행량을 부여한다.
     // 1 ether = 10^18 wei
     // 즉 컨트랙트를 배포하는 사람에게 1MT 만큼 발행량을 부여한다.  
-         owner = msg.sender; // owner는 컨트랙트를 배포한 사람으로 지정해준다. 물론, minting에 제한을 둬야 하지만, 이는 구현이 복잡해지므로 생략한다. 
-         manager = msg.sender; // manager는 컨트랙트를 배포한 사람으로 초기화. 
+        //  owner = msg.sender; // owner는 컨트랙트를 배포한 사람으로 지정해준다. 물론, minting에 제한을 둬야 하지만, 이는 구현이 복잡해지므로 생략한다. 
+        //  manager = msg.sender; // manager는 컨트랙트를 배포한 사람으로 초기화. 
     }
-    modifier ownerOnly() {
-        require(msg.sender == owner, "You are not authorized");
-        _;  
-    }
-    modifier OnlyManager() {
-        require(msg.sender == manager, "You are not authorized to manage this token");
-        _;
-    }
+    
 
     function _mint(uint256 amount, address to) internal {
         totalSupply += amount; 
