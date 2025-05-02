@@ -20,6 +20,8 @@ describe("TinyBank", () => {
     tinyBankContract = await hre.ethers.deployContract("TinyBank", [
       myTokenContract.getAddress(),
     ]);
+    // 초기화 시, myTokenCtract를 manager로 설정한다.
+    await myTokenContract.setManager(tinyBankContract.getAddress());
   });
   describe("Initialized state check", () => {
     it("should return totalStaked 0", async () => {
@@ -82,6 +84,13 @@ describe("TinyBank", () => {
       await tinyBankContract.withdraw(stakingAmount);
       console.log("signer0 amount when withdraw 50MT", await myTokenContract.balanceOf(signer0.address));
       expect(await myTokenContract.balanceOf(signer0.address)).equal(amount(BLOCKS + MINTING_AMOUNT + 1n));
+    })
+
+    it("should revert when changing rewardPerBlock by hacker", async () => {
+      const hacker = signers[1];
+      const rewardToChange = amount(10000);
+      await expect (tinyBankContract.connect(hacker).setRewardPerBlock(rewardToChange)).to.be.revertedWith("You are not authorized to manage this contract"); 
+
     })
   })
 });

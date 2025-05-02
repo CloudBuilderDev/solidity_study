@@ -9,27 +9,35 @@
 
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
+import "./ManagedAccess.sol";
 
 // TinyBank와 MyToken간의 통신을 위한 인터페이스 
-interface IMyToken {
+interface IMyToken  {
     function transfer(address to, uint256 amount) external;
     function transferFrom(address from, address to, uint256 amount) external;
     function mint(uint256 amount, address owner) external;
 } 
-contract TinyBank {
+contract TinyBank is ManagedAccess{
     event Staked(address from, uint256 amount);
     event Withdrawn(address to, uint256 amount);
 
     IMyToken public stakingToken; // 예금/출금을 위한 토큰의 주소를 저장
 
     mapping(address => uint256) public lastClaimedBlock;
-    uint256 rewardPerBlock = 1*10**18;
+    uint256 DefaultRewardPerBlock = 1*10**18;
+    uint256 rewardPerBlock;
+        
 
     mapping(address => uint256) public staked;
     uint256 public totalStaked;
      
-    constructor(IMyToken _stakingToken) {
+    constructor(IMyToken _stakingToken) ManagedAccess(msg.sender, msg.sender) {
         stakingToken = IMyToken(_stakingToken);
+        rewardPerBlock = DefaultRewardPerBlock;
+    }
+
+    function setRewardPerBlock(uint256 _amount) external OnlyManager {
+        rewardPerBlock = _amount;
     }
 
     function stake(uint256 _amount) external UpdateReward(msg.sender) {
