@@ -32,18 +32,18 @@ contract TinyBank {
         stakingToken = IMyToken(_stakingToken);
     }
 
-    function stake(uint256 _amount) external {
+    function stake(uint256 _amount) external UpdateReward(msg.sender) {
         require(_amount >=0, "cannot stake 0 amount");
-        distributeReward(msg.sender);
+        // UpdateReward(msg.sender);
         stakingToken.transferFrom(msg.sender, address(this), _amount);
         staked[msg.sender] += _amount;
         totalStaked += _amount;
         emit Staked(msg.sender, _amount);
     }
 
-    function withdraw(uint256 _amount) external {
+    function withdraw(uint256 _amount) external UpdateReward(msg.sender) {
         require(staked[msg.sender] >= _amount, "insufficient staked token");
-        distributeReward(msg.sender);
+        // UpdateReward(msg.sender);
         stakingToken.transfer(msg.sender, _amount);
         staked[msg.sender] -= _amount;
         totalStaked -= _amount;
@@ -61,10 +61,18 @@ contract TinyBank {
     //   |              |
     // - signer0 10MT   signer1 10MT
 
-    function distributeReward(address to ) internal{
+
+// midifier는 기본적으로 internal임, 외부에서 호출할 수 없음
+// modifier는 함수가 아니기에 함수처럼 호출 할 수 없다. 
+// _;가 앞에 붙어있으면, modifier가 적용된 함수가 실행되기 전에 modifier가 실행된다.
+// _;가 뒤에 붙어있으면, modifier가 적용된 함수가 실행된 후에 modifier가 실행된다.
+    modifier UpdateReward(address to ) {
+        if(staked[to] > 0) {
        uint256 blocks = block.number - lastClaimedBlock[to];
        uint256 reward = (blocks*rewardPerBlock*staked[to])/totalStaked;
        stakingToken.mint(reward, to);
+        }
        lastClaimedBlock[to] = block.number; 
+       _;
     }
 }
