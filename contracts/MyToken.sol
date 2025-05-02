@@ -7,6 +7,8 @@ contract MyToken {
     string public name;
     string public symbol;
     uint8 public decimals; // 1wei --> 1*10^-18 즉 지원하는 소수점 범위 
+    address public owner; // 컨트랙트 배포자
+    address public manager; // TinyBank의 매니저
 
     uint256 public totalSupply; // 발행량
     mapping(address => uint256) public balanceOf; // 어떤 주소의 잔고(key => value)
@@ -22,16 +24,30 @@ contract MyToken {
        _mint(_amount*10**uint256(decimals), msg.sender); // 컨트랙트 배포자에게 발행량을 부여한다.
     // 1 ether = 10^18 wei
     // 즉 컨트랙트를 배포하는 사람에게 1MT 만큼 발행량을 부여한다.  
+         owner = msg.sender; // owner는 컨트랙트를 배포한 사람으로 지정해준다. 물론, minting에 제한을 둬야 하지만, 이는 구현이 복잡해지므로 생략한다. 
+         manager = msg.sender; // manager는 컨트랙트를 배포한 사람으로 초기화. 
+    }
+    modifier ownerOnly() {
+        require(msg.sender == owner, "You are not authorized");
+        _;  
+    }
+    modifier OnlyManager() {
+        require(msg.sender == manager, "You are not authorized to manage this token");
+        _;
     }
 
-    function _mint(uint256 amount, address owner) internal {
+    function _mint(uint256 amount, address to) internal {
         totalSupply += amount; 
-        balanceOf[owner] += amount; // owner의 잔고에 amount를 더해준다.
-        emit Transfer(address(0), owner, amount); 
+        balanceOf[to] += amount; // owner의 잔고에 amount를 더해준다.
+        emit Transfer(address(0), to, amount); 
     }
     
-    function mint (uint256 amount, address owner) external{
-        _mint(amount, owner);
+    function mint (uint256 amount, address to) external OnlyManager {
+        _mint(amount, to);
+    }
+
+    function setManager(address manager_) external ownerOnly {
+        manager = manager_;
     }
 
     function transfer(address to, uint256 amount) external {
