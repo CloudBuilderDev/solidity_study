@@ -10,6 +10,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 import "./ManagedAccess.sol";
+import "./MultiManagedAccess.sol"; 
 
 // TinyBank와 MyToken간의 통신을 위한 인터페이스 
 interface IMyToken  {
@@ -17,7 +18,7 @@ interface IMyToken  {
     function transferFrom(address from, address to, uint256 amount) external;
     function mint(uint256 amount, address owner) external;
 } 
-contract TinyBank is ManagedAccess{
+contract TinyBank is MultiManagedAccess {
     event Staked(address from, uint256 amount);
     event Withdrawn(address to, uint256 amount);
 
@@ -26,17 +27,23 @@ contract TinyBank is ManagedAccess{
     mapping(address => uint256) public lastClaimedBlock;
     uint256 DefaultRewardPerBlock = 1*10**18;
     uint256 rewardPerBlock;
+
+    function getRewardPerBlock() external view returns (uint256) {
+        return rewardPerBlock;
+    }
         
 
     mapping(address => uint256) public staked;
     uint256 public totalStaked;
-     
-    constructor(IMyToken _stakingToken) ManagedAccess(msg.sender, msg.sender) {
+
+    // MultiMangedAccess의 생성자 인자를 다음과 같이 전달한다.
+    constructor(IMyToken _stakingToken, address[] memory _managers, uint256 _ManagerNumber) MultiManagedAccess(msg.sender, _managers, _ManagerNumber) {
         stakingToken = IMyToken(_stakingToken);
         rewardPerBlock = DefaultRewardPerBlock;
     }
 
-    function setRewardPerBlock(uint256 _amount) external OnlyManager {
+    // modifier를 onlyAllConfirmed로 설정하여, 모든 매니저가 확인을 해야만 실행되도록 한다.
+    function setRewardPerBlock(uint256 _amount) external onlyAllConfirmed{
         rewardPerBlock = _amount;
     }
 
