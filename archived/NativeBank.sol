@@ -3,8 +3,16 @@ pragma solidity ^0.8.28;
 
 contract NativeBank {
     mapping(address => uint256) public balanceOf;
+    bool lock;
 
-    function withdraw() external {
+    modifier NoReentrancy() {
+        require(!lock, "is now working on");
+        lock = true;
+        _;
+        lock = false;
+    }
+
+    function withdraw() external NoReentrancy {
         uint256 balance = balanceOf[msg.sender]; // 잔고를 한번에 가져오기
         require(balance > 0, "Insufficient balance");
 

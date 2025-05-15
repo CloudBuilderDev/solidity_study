@@ -151,7 +151,7 @@ describe("TinyBank", () => {
   });
 });
 
-// uitl fucntions 
+// util fucntions 
 function amount(_amount: BigNumberish) {
   return hre.ethers.parseUnits(_amount.toString(), DECIMALS);
 }
