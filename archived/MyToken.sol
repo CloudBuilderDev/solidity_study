@@ -56,6 +56,7 @@ contract MyToken is ManagedAccess { // ManagedAccess를 상속받는다.
     function transferFrom(address from, address to, uint256 amount) external {
         address spender = msg.sender; // 송신자 즉, 토큰을 가진 사람이 아니라 owner에게 전송을 허락받은 사람이다
         require(allowance[from][spender] >= amount, "insufficient allowance"); // 송신자가 spender에게 허락한 양이 amount보다 적으면 에러 발생
+        require(balanceOf[from] >= amount, "insufficient balance");
         allowance[from][spender] -= amount; // sepnder가 송신을 허락받은 양 만큼 차감한다.  
         balanceOf[from] -= amount; // 송신자에게서 amount를 차감한다.
         balanceOf[to] += amount; // 수신자에게 amount를 더해준다.
