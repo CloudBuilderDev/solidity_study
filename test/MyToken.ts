@@ -41,9 +41,14 @@ describe("MyToken", () => {
     });
   });
   describe("minting", () => {
-    it("should retrun 1MT balance for signer 0", async () => {
-      expect(await myTokenContract.balanceOf(signers[0].address)).equal(
-        totalSupply
+    it("should return initial supply + 1MT balance for signer 0", async () => {
+      const signer0 = signers[0];
+      // console.log(await myTokenContract.balanceOf(signer0.address));
+      const oneMT = hre.ethers.parseUnits("1", DECIMALS);
+      await myTokenContract.mint(oneMT, signer0.address);
+      // console.log(await myTokenContract.balanceOf(signer0.address));
+      expect(await myTokenContract.balanceOf(signer0.address)).equal(
+        totalSupply + oneMT
       );
     });
     it("should return or revert when minitng infinitly", async () => {
@@ -73,11 +78,7 @@ describe("MyToken", () => {
       //);
       await expect(
         // await을 expect앞에 감싸줘야 의도한대로 작동한다.
-        myTokenContract.transfer(
-          signer1.address,
-          hre.ethers.parseUnits("0.5", DECIMALS)
-        )
-      )
+        myTokenContract.transfer(hre.ethers.parseUnits("0.5", DECIMALS), signer1.address))
         .to.emit(myTokenContract, "Transfer")
         .withArgs(
           signer0.address,
@@ -100,11 +101,7 @@ describe("MyToken", () => {
     it("should be revert with insufficient balance error ", async () => {
       const signer1 = signers[1];
       await expect(
-        myTokenContract.transfer(
-          signer1.address,
-          hre.ethers.parseUnits((MINTING_AMOUNT + 1n).toString(), DECIMALS)
-        )
-      ).to.be.revertedWith("insufficient balance");
+        myTokenContract.transfer(hre.ethers.parseUnits((MINTING_AMOUNT + 1n).toString(), DECIMALS), signer1.address)).to.be.revertedWith("insufficient balance");
     });
   });
 

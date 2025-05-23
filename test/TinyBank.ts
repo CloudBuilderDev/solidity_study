@@ -21,11 +21,14 @@ describe("TinyBank", () => {
     // signer0 ~ 4까지의 주소를 manager로 설정한다.
     const managersAdress = signers.slice(0,5).map(signer => signer.address);
 
-    // tinyBankContract를 생성할 때, 인자로 매니저들의 주소와 그 명수를 넘겨준다. 
+    // // tinyBankContract를 생성할 때, 인자로 매니저들의 주소와 그 명수를 넘겨준다. 
+    // tinyBankContract = await hre.ethers.deployContract("TinyBank", [
+    //   myTokenContract.getAddress(),
+    //   managersAdress,
+    //   managersAdress.length,
+    // ]);
     tinyBankContract = await hre.ethers.deployContract("TinyBank", [
-      myTokenContract.getAddress(),
-      managersAdress,
-      managersAdress.length,
+      await myTokenContract.getAddress()
     ]);
 
     await myTokenContract.setManager(tinyBankContract.getAddress());
@@ -47,7 +50,10 @@ describe("TinyBank", () => {
         await tinyBankContract.getAddress(),
         stakingAmount
       );
-      await tinyBankContract.stake(stakingAmount);
+      expect(await tinyBankContract.stake(stakingAmount)).to.emit(tinyBankContract, "Staked").withArgs(
+        signer0.address,
+        stakingAmount
+      );
       expect(await tinyBankContract.staked(signer0.address)).equal(
         stakingAmount
       );
@@ -67,7 +73,10 @@ describe("TinyBank", () => {
         stakingAmount
       );
       await tinyBankContract.stake(stakingAmount);
-      await tinyBankContract.withdraw(stakingAmount);
+      expect(await tinyBankContract.withdraw(stakingAmount)).to.emit(tinyBankContract, "Withdrawn").withArgs(
+        stakingAmount,
+        signer0.address
+        );
       expect(await tinyBankContract.staked(signer0.address)).equal(0);
     });
   });
@@ -84,7 +93,7 @@ describe("TinyBank", () => {
       const BLOCKS = 5n;
       const transferAmount = amount(1);
       for (var i = 0; i< BLOCKS; i++) {
-        await myTokenContract.transfer(signer0.address, transferAmount);
+        await myTokenContract.transfer( transferAmount, signer0.address);
       }
       // console.log("block number when transfer 5MT", await getBlockNumber());
 
