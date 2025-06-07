@@ -2,7 +2,7 @@ import hre from "hardhat";
 import { expect } from "chai";
 import { MyToken } from "../typechain-types";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
-import MyToken from "../ignition/modules/MyToken";
+import MyToken from "../ignition/modules/deploys";
 import { DECIMALS, MINTING_AMOUNT } from "./constant";
 
 const totalSupply = MINTING_AMOUNT * 10n ** DECIMALS;
