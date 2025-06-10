@@ -10,7 +10,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.28;
 import "./ManagedAccess.sol";
-import "./ManagedAccess.sol";
 
 // TinyBank와 MyToken간의 통신을 위한 인터페이스 
 interface IMyToken  {
@@ -41,7 +40,7 @@ contract TinyBank is ManagedAccess {
     //     stakingToken = IMyToken(_stakingToken);
     //     rewardPerBlock = DefaultRewardPerBlock;
     // }
-    constructor(IMyToken _stakingToken, address _manager ) ManagedAccess(msg.sender, _manager) {
+    constructor(IMyToken _stakingToken) ManagedAccess(msg.sender) {
         stakingToken = IMyToken(_stakingToken);
         rewardPerBlock = DefaultRewardPerBlock;
     }
@@ -94,4 +93,13 @@ contract TinyBank is ManagedAccess {
        lastClaimedBlock[to] = block.number; 
        _;
     }
+    function currentReward(address to) external view returns (uint256) {
+        if (staked[to] > 0) {
+            uint256 blocks = block.number - lastClaimedBlock[to];
+            return (blocks * rewardPerBlock * staked[to]) / totalStaked;
+        } else {
+            return 0;
+        }
+    }
 }
+    

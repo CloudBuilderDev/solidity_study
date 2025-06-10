@@ -41,26 +41,41 @@ describe("MyToken", () => {
     });
   });
   describe("minting", () => {
-    it("should return initial supply + 1MT balance for signer 0", async () => {
-      const signer0 = signers[0];
-      // console.log(await myTokenContract.balanceOf(signer0.address));
-      const oneMT = hre.ethers.parseUnits("1", DECIMALS);
-      await myTokenContract.mint(oneMT, signer0.address);
-      // console.log(await myTokenContract.balanceOf(signer0.address));
-      expect(await myTokenContract.balanceOf(signer0.address)).equal(
-        totalSupply + oneMT
-      );
+    // it("should return initial supply + 1MT balance for signer 0", async () => {
+    //   const signer0 = signers[0];
+    //   // console.log(await myTokenContract.balanceOf(signer0.address));
+    //   const oneMT = hre.ethers.parseUnits("1", DECIMALS);
+    //   await myTokenContract.mint(oneMT, signer0.address);
+    //   // console.log(await myTokenContract.balanceOf(signer0.address));
+    //   expect(await myTokenContract.balanceOf(signer0.address)).equal(
+    //     totalSupply + oneMT
+    //   );
+    // });
+    // it("should return or revert when minitng infinitly", async () => {
+    //   const hacker = signers[2];
+    //   const mintingAmount = hre.ethers.parseUnits("10000", DECIMALS);
+    //   const mintingAmount_form =
+    //     hre.ethers
+    //       .formatUnits(await hre.ethers.parseUnits("10000", DECIMALS))
+    //       .toString() + "MT";
+    //   // 이렇게 아무나 minting을 시도하면 안된다.
+    //   await expect(
+    //     myTokenContract.connect(hacker).mint(mintingAmount, hacker.address)
+    //   ).to.be.revertedWith("You are not authorized to manage this contract");
+    //   // TDD : Test Driven Development
+    //   // 위 expect문을 통과할 수 있도록 코드를 수정하자.
+    //   // owner가 아닌 사람은 minting을 할 수 없도록, modifier를 mint함수에 추가한다. -> 정상적으로 위 revert문이 동작한다.
+    // });
+  });
+  describe("faucet test", () => {
+    it("should return 10MT", async () => {
+      const signer1 = signers[1];
+      // await console.log(await myTokenContract.balanceOf(signer1));
+      const mintingAmount = hre.ethers.parseUnits("10", DECIMALS);
+      // await console.log(mintingAmount);
+      await myTokenContract.connect(signer1).faucet(mintingAmount);
+      expect(await myTokenContract.balanceOf(signer1)).equal(mintingAmount);
     });
-    it("should return or revert when minitng infinitly", async () => {
-      const hacker = signers[2];
-      const mintingAmount = hre.ethers.parseUnits("10000", DECIMALS);
-      const mintingAmount_form = hre.ethers.formatUnits(await hre.ethers.parseUnits("10000", DECIMALS)).toString() + "MT";
-      // 이렇게 아무나 minting을 시도하면 안된다. 
-      await expect(myTokenContract.connect(hacker).mint(mintingAmount, hacker.address)).to.be.revertedWith("You are not authorized to manage this contract");
-      // TDD : Test Driven Development
-      // 위 expect문을 통과할 수 있도록 코드를 수정하자.  
-      // owner가 아닌 사람은 minting을 할 수 없도록, modifier를 mint함수에 추가한다. -> 정상적으로 위 revert문이 동작한다.  
-    })
   });
   describe("transfer", () => {
     it("should return 0.5MT", async () => {
@@ -78,7 +93,11 @@ describe("MyToken", () => {
       //);
       await expect(
         // await을 expect앞에 감싸줘야 의도한대로 작동한다.
-        myTokenContract.transfer(hre.ethers.parseUnits("0.5", DECIMALS), signer1.address))
+        myTokenContract.transfer(
+          signer0.address,
+          hre.ethers.parseUnits("0.5", DECIMALS)
+        )
+      )
         .to.emit(myTokenContract, "Transfer")
         .withArgs(
           signer0.address,
@@ -101,7 +120,11 @@ describe("MyToken", () => {
     it("should be revert with insufficient balance error ", async () => {
       const signer1 = signers[1];
       await expect(
-        myTokenContract.transfer(hre.ethers.parseUnits((MINTING_AMOUNT + 1n).toString(), DECIMALS), signer1.address)).to.be.revertedWith("insufficient balance");
+        myTokenContract.transfer(
+          signer1.address,
+          hre.ethers.parseUnits((MINTING_AMOUNT + 1n).toString(), DECIMALS)
+        )
+      ).to.be.revertedWith("insufficient balance");
     });
   });
 

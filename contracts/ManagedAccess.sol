@@ -4,8 +4,10 @@ pragma solidity ^0.8.28;
 abstract contract ManagedAccess {
     address public owner;
     address public manager;
-    constructor(address _owner, address _manager) {
+    constructor(address _owner) {
         owner = _owner;
+    }
+    function setManager(address _manager) external {
         manager = _manager;
     }
     modifier ownerOnly() {

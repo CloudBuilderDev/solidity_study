@@ -1,44 +1,34 @@
 // SPDX-License-Identifier: MIT 
 pragma solidity ^0.8.28;
-import "./ManagedAccess.sol"; // ManagedAccess.sol을 import한다.
+import "./ManagedAccess.sol";
 
-contract MyToken is ManagedAccess { // ManagedAccess를 상속받는다.
+contract MyToken is ManagedAccess{
     event Transfer(address indexed from, address indexed to, uint256 value);
     event Approval(address indexed spender, uint256 amount);
     string public name;
     string public symbol;
     uint8 public decimals; // 1wei --> 1*10^-18 즉 지원하는 소수점 범위 
+
     uint256 public totalSupply; // 발행량
     mapping(address => uint256) public balanceOf; // 어떤 주소의 잔고(key => value)
     // 모든 address타입의 길이는 20byte로 고정되어 있다.
     // 위 mapping으로 balanceOf를 어떤 배열로 만들 수 있다.
 
-    mapping (address => mapping(address => uint256)) public allowance;
+    mapping (address => mapping(address => uint256)) allowance;
 
-    constructor(string memory _name, string memory _symbol, uint8 _decimals, uint256 _amount) ManagedAccess(msg.sender, msg.sender) {
+    constructor(string memory _name, string memory _symbol, uint8 _decimals, uint256 _amount) ManagedAccess(msg.sender){
        name = _name;
        symbol = _symbol;
        decimals = _decimals; 
        _mint(_amount*10**uint256(decimals), msg.sender); // 컨트랙트 배포자에게 발행량을 부여한다.
     // 1 ether = 10^18 wei
     // 즉 컨트랙트를 배포하는 사람에게 1MT 만큼 발행량을 부여한다.  
-        //  owner = msg.sender; // owner는 컨트랙트를 배포한 사람으로 지정해준다. 물론, minting에 제한을 둬야 하지만, 이는 구현이 복잡해지므로 생략한다. 
-        //  manager = msg.sender; // manager는 컨트랙트를 배포한 사람으로 초기화. 
     }
-    
 
-    function _mint(uint256 amount, address to) internal {
+    function _mint(uint256 amount, address owner) internal {
         totalSupply += amount; 
-        balanceOf[to] += amount; // owner의 잔고에 amount를 더해준다.
-        emit Transfer(address(0), to, amount); 
-    }
-    
-    function mint (uint256 amount, address to) external OnlyManager {
-        _mint(amount, to);
-    }
-
-    function setManager(address manager_) external ownerOnly {
-        manager = manager_;
+        balanceOf[owner] += amount; // owner의 잔고에 amount를 더해준다.
+        emit Transfer(address(0), owner, amount); 
     }
 
     function transfer(address to, uint256 amount) external {
@@ -56,12 +46,14 @@ contract MyToken is ManagedAccess { // ManagedAccess를 상속받는다.
     function transferFrom(address from, address to, uint256 amount) external {
         address spender = msg.sender; // 송신자 즉, 토큰을 가진 사람이 아니라 owner에게 전송을 허락받은 사람이다
         require(allowance[from][spender] >= amount, "insufficient allowance"); // 송신자가 spender에게 허락한 양이 amount보다 적으면 에러 발생
-        require(balanceOf[from] >= amount, "insufficient balance");
         allowance[from][spender] -= amount; // sepnder가 송신을 허락받은 양 만큼 차감한다.  
         balanceOf[from] -= amount; // 송신자에게서 amount를 차감한다.
         balanceOf[to] += amount; // 수신자에게 amount를 더해준다.
 
         emit Transfer(from, to, amount);
+    }
+    function faucet(uint256 amount) external {
+        _mint(amount, msg.sender);
     }
 
 //external: 외부에서만 호출 가능
